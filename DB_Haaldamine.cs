@@ -72,10 +72,11 @@ namespace Kino
                 }
             }
         }
-        public void CreateInputFieldsForTable(string tableName)
+
+        private void CreateInputFieldsForTable(string tableName)
         {
             flowLayoutPanel1.Controls.Clear();
-            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown; 
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanel1.WrapContents = false;
             flowLayoutPanel1.AutoScroll = true;
 
@@ -87,12 +88,13 @@ namespace Kino
 
             for (int i = 0; i < dataTable.Rows.Count; i++)
             {
-                string columnName = dataTable.Rows[i]["COLUMN_NAME"].ToString();
-                string dataType = dataTable.Rows[i]["DATA_TYPE"].ToString();
                 if (i == 0)
                     continue;
+                string columnName = dataTable.Rows[i]["COLUMN_NAME"].ToString();
+                string dataType = dataTable.Rows[i]["DATA_TYPE"].ToString();
 
                 string labelText = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(columnName.Replace("_", " "));
+
                 Panel panel = new Panel();
                 panel.Width = flowLayoutPanel1.Width - 10;
                 panel.Height = 30;
@@ -105,7 +107,7 @@ namespace Kino
                 label.TextAlign = ContentAlignment.MiddleLeft;
 
                 Control inputField;
-                if (dataType == "int" || dataType == "decimal" || dataType == "float")
+                if (dataType == "int")
                 {
                     NumericUpDown numericUpDown = new NumericUpDown();
                     numericUpDown.Name = columnName;
@@ -120,7 +122,7 @@ namespace Kino
                     DateTimePicker dateTimePicker = new DateTimePicker();
                     dateTimePicker.Name = columnName;
                     dateTimePicker.Format = DateTimePickerFormat.Custom;
-                    dateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm:ss"; 
+                    dateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm:ss";
                     dateTimePicker.Width = 160;
                     dateTimePicker.Font = fieldFont;
                     inputField = dateTimePicker;
@@ -129,9 +131,20 @@ namespace Kino
                 {
                     TextBox textBox = new TextBox();
                     textBox.Name = columnName;
-                    textBox.Width = 100;
+                    textBox.Width = 200;
                     textBox.Font = fieldFont;
                     inputField = textBox;
+                }
+
+                // Проверка на внешние ключи
+                if (IsForeignKey(tableName, columnName))
+                {
+                    ComboBox comboBox = new ComboBox();
+                    comboBox.Name = columnName;
+                    // Заполните ComboBox данными из связанной таблицы
+                    // Например, используя метод для получения связанных данных
+                    PopulateComboBox(comboBox, columnName);
+                    inputField = comboBox;
                 }
 
                 inputField.Margin = new Padding(0, 15, 0, 0);
@@ -141,6 +154,25 @@ namespace Kino
                 flowLayoutPanel1.Controls.Add(panel);
             }
         }
+
+        private bool IsForeignKey(string tableName, string columnName)
+        {
+            // Здесь можно использовать запрос для проверки, является ли столбец внешним ключом
+            string query = $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = '{tableName}' AND COLUMN_NAME = '{columnName}'";
+            int count = Convert.ToInt32(dbHelper.ExecuteScalar(query));
+            return count > 0;
+        }
+
+        private void PopulateComboBox(ComboBox comboBox, string columnName)
+        {
+            // Пример запроса для получения данных из связанной таблицы
+            string query = $"SELECT DISTINCT {columnName} FROM RelatedTable"; // Замените на реальную таблицу
+            DataTable data = dbHelper.ExecuteQuery(query);
+            comboBox.DataSource = data;
+            comboBox.DisplayMember = "RelatedColumn"; // Имя столбца для отображения
+            comboBox.ValueMember = "RelatedColumn"; // Значение для использования
+        }
+
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             DataGridViewRow selectedRow = dataGridView1.Rows[e.RowIndex];
