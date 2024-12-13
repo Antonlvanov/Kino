@@ -31,9 +31,7 @@ namespace Kino
                 conn = new SqlConnection($@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={db_path};Integrated Security=True");
             }
         }
-        /// <summary>
-        /// Выполняет SQL-запрос и возвращает результаты в виде DataTable.
-        /// </summary>
+        /// Executes an SQL query and returns the results as a DataTable.
         public DataTable ExecuteQuery(string query, Dictionary<string, object> parameters = null)
         {
             try
@@ -44,7 +42,6 @@ namespace Kino
                 }
                 using (cmd = new SqlCommand(query, conn))
                 {
-                    // Добавляем параметры, если они есть
                     if (parameters != null)
                     {
                         foreach (var param in parameters)
@@ -74,9 +71,7 @@ namespace Kino
             }
         }
 
-        /// <summary>
-        /// Выполняет SQL-команду без возврата результата (например, INSERT, UPDATE, DELETE).
-        /// </summary>
+        /// SQL command without returning a result (e.g. INSERT, UPDATE, DELETE)
         public bool ExecuteNonQuery(string query, Dictionary<string, object> parameters = null)
         {
             try
@@ -112,9 +107,7 @@ namespace Kino
                 }
             }
         }
-        /// <summary>
-        /// Выполняет SQL-запрос и возвращает одиночное значение.
-        /// </summary>
+        /// Executes an SQL query and returns a single value.
         public object ExecuteScalar(string query, Dictionary<string, object> parameters = null)
         {
             try
