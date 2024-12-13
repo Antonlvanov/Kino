@@ -31,7 +31,6 @@
             this.tableListBox = new System.Windows.Forms.ListBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
             this.uuenda_btn = new System.Windows.Forms.Button();
             this.kustuta_btn = new System.Windows.Forms.Button();
             this.lisa_btn = new System.Windows.Forms.Button();
@@ -45,9 +44,9 @@
             this.tableListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F);
             this.tableListBox.FormattingEnabled = true;
             this.tableListBox.ItemHeight = 25;
-            this.tableListBox.Location = new System.Drawing.Point(12, 59);
+            this.tableListBox.Location = new System.Drawing.Point(12, 23);
             this.tableListBox.Name = "tableListBox";
-            this.tableListBox.Size = new System.Drawing.Size(202, 229);
+            this.tableListBox.Size = new System.Drawing.Size(200, 279);
             this.tableListBox.TabIndex = 0;
             this.tableListBox.DoubleClick += new System.EventHandler(this.vali_btn_Click);
             // 
@@ -64,20 +63,10 @@
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(231, 59);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(231, 21);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(367, 200);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(367, 251);
             this.flowLayoutPanel1.TabIndex = 21;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F);
-            this.label1.Location = new System.Drawing.Point(82, 21);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(82, 26);
-            this.label1.TabIndex = 22;
-            this.label1.Text = "Tabelid";
             // 
             // uuenda_btn
             // 
@@ -113,7 +102,7 @@
             // 
             this.pictureBox1.Location = new System.Drawing.Point(604, 21);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(227, 267);
+            this.pictureBox1.Size = new System.Drawing.Size(227, 251);
             this.pictureBox1.TabIndex = 27;
             this.pictureBox1.TabStop = false;
             // 
@@ -126,7 +115,6 @@
             this.Controls.Add(this.uuenda_btn);
             this.Controls.Add(this.kustuta_btn);
             this.Controls.Add(this.lisa_btn);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.tableListBox);
@@ -135,7 +123,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -144,7 +131,6 @@
         private System.Windows.Forms.ListBox tableListBox;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button uuenda_btn;
         private System.Windows.Forms.Button kustuta_btn;
         private System.Windows.Forms.Button lisa_btn;
