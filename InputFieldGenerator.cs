@@ -25,9 +25,6 @@ namespace Kino
         public void GenerateFields(FlowLayoutPanel panel, string tableName)
         {
             panel.Controls.Clear();
-            panel.FlowDirection = FlowDirection.TopDown;
-            panel.WrapContents = false;
-            panel.AutoScroll = true;
 
             DataTable columnsTable = GetColumnsInfo(tableName);
             DataTable foreignKeysTable = GetForeignKeysInfo(tableName);
@@ -44,24 +41,30 @@ namespace Kino
                 inputField.Margin = new Padding(0, 15, 0, 0);
                 inputField.Location = new Point(label.Width + 10, 0);
 
+                // controls
                 fieldPanel.Controls.Add(label);
                 fieldPanel.Controls.Add(inputField);
                 panel.Controls.Add(fieldPanel);
             }
-            Button unite_btn = new Button
+            if (foreignKeysTable.Rows.Count > 0)
             {
-                Size = new Size(20, 20),
-                Location = new Point(panel.Width - 30, panel.Height - 30),
-                BackgroundImageLayout = ImageLayout.Stretch,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.Transparent
-            };
-            unite_btn.FlatAppearance.BorderSize = 0;
-            unite_btn.BackgroundImage = Image.FromFile(Path.Combine(projectRoot, "chain.png"));
-            unite_btn.Dock = DockStyle.Right;
-            unite_btn.Click += (s, e) => TransformForeignKeyFields(panel, foreignKeysTable);
-            panel.Controls.Add(unite_btn);
+                Button uniteButton = CreateUniteButton(panel.Width, panel.Height);
+                uniteButton.Click += (s, e) => TransformForeignKeyFields(panel, foreignKeysTable);
+                panel.Controls.Add(uniteButton);
+            }
         }
+
+        //private Button CreateFilterButton(string columnName)
+        //{
+        //    return new Button
+        //    {
+        //        Name = $"{columnName}_filterBtn",
+        //        Width = 25,
+        //        Height = 25,
+        //        Font = fieldFont
+        //    };
+        //}
+
 
         private void TransformForeignKeyFields(FlowLayoutPanel panel, DataTable foreignKeysTable)
         {
@@ -76,12 +79,11 @@ namespace Kino
                     {
                         // Replace input field with ComboBox
                         DataRow foreignKeyRow = foreignKeysTable.Select($"COLUMN_NAME = '{inputField.Name}'").First();
-                        Control comboBox = CreateComboBox(inputField.Name, foreignKeyRow);
+                        Control comboBox = (ComboBox)CreateComboBox(inputField.Name, foreignKeyRow);
                         comboBox.Location = inputField.Location;
 
                         fieldPanel.Controls.Remove(inputField);
                         fieldPanel.Controls.Add(comboBox);
-
                         // Update label text
                         if (label != null)
                         {
@@ -110,7 +112,7 @@ namespace Kino
             return new ComboBox
             {
                 Name = columnName,
-                Width = 200,
+                Width = 160,
                 Font = fieldFont,
                 DataSource = dataSource,
                 DisplayMember = displayColumn,
@@ -127,10 +129,27 @@ namespace Kino
             {
                 return CreateDateTimePicker(columnName);
             }
+            else if(dataType == "bit")
+            {
+                return CreateCheckBox(columnName);
+            }
             else
             {
                 return CreateTextBox(columnName);
             }
+        }
+        private Button CreateUniteButton(int panelWidth, int panelHeight)
+        {
+            return new Button
+            {
+                Font = new System.Drawing.Font("Microsoft JhengHei", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0))),
+                Name = "unite_btn",
+                AutoSize = true,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+                TabIndex = 0,
+                Text = "Ühenda tabelid",
+                UseVisualStyleBackColor = true
+            };
         }
 
         // QUERIES
@@ -204,6 +223,17 @@ namespace Kino
                 Font = fieldFont
             };
         }
+
+        private CheckBox CreateCheckBox(string columnName)
+        {
+            return new CheckBox
+            {
+                Name = columnName,
+                Size = new Size(25,25),
+                Font = fieldFont
+            };
+        }
+
 
         private TextBox CreateTextBox(string columnName)
         {

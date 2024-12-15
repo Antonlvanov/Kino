@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -45,6 +46,14 @@ namespace Kino
                 MessageBox.Show("Ошибка при загрузке таблиц.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void filter_btn_Click(object sender, EventArgs e)
+        {
+            if (tableListBox.SelectedItem != null)
+            {
+                string selected_table = tableListBox.SelectedItem.ToString();
+                FilterData(selected_table);
+            }
+        }
 
         private void vali_btn_Click(object sender, EventArgs e)
         {
@@ -64,7 +73,6 @@ namespace Kino
                         DataGridViewTextBoxColumn dataGridViewColumn = new DataGridViewTextBoxColumn();
                         dataGridViewColumn.DataPropertyName = column.ColumnName;
                         dataGridViewColumn.Name = column.ColumnName;
-                        dataGridViewColumn.HeaderText = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(column.ColumnName.Replace("_", " "));
                         dataGridView1.Columns.Add(dataGridViewColumn);
                     }
 
@@ -77,6 +85,111 @@ namespace Kino
                 }
             }
         }
+
+        private void FilterData(string tableName)
+        {
+            StringBuilder queryBuilder = new StringBuilder($"SELECT * FROM {tableName} WHERE 1 = 1");
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+
+            int controlCount = 0;
+
+            foreach (Control control in flowLayoutPanel1.Controls)
+            {
+                controlCount++;
+
+                string columnName = control.Name;
+
+                // Используем Find для поиска каждого контрола по имени
+                Control[] foundControls = flowLayoutPanel1.Controls.Find(columnName, true);
+
+                if (foundControls.Length > 0)
+                {
+                    // Получаем первый найденный контрол с таким именем
+                    Control foundControl = foundControls[0];
+
+                    if (foundControl is TextBox textBox)
+                    {
+                        Console.WriteLine($"TextBox found: Name = {columnName}, Value = {textBox.Text}");
+
+                        if (!string.IsNullOrEmpty(textBox.Text))
+                        {
+                            queryBuilder.Append($" AND {columnName} LIKE @{columnName}");
+                            parameters.Add($"@{columnName}", $"%{textBox.Text}%");
+                        }
+                    }
+                    else if (foundControl is ComboBox comboBox)
+                    {
+                        Console.WriteLine($"ComboBox found: Name = {columnName}, SelectedItem = {comboBox.SelectedItem}");
+
+                        if (comboBox.SelectedItem != null)
+                        {
+                            queryBuilder.Append($" AND {columnName} = @{columnName}");
+                            parameters.Add($"@{columnName}", comboBox.SelectedItem.ToString());
+                        }
+                    }
+                    else if (foundControl is NumericUpDown numericUpDown)
+                    {
+                        Console.WriteLine($"NumericUpDown found: Name = {columnName}, Value = {numericUpDown.Value}");
+
+                        if (numericUpDown.Value > 0)
+                        {
+                            queryBuilder.Append($" AND {columnName} = @{columnName}");
+                            parameters.Add($"@{columnName}", numericUpDown.Value);
+                        }
+                    }
+                    else if (foundControl is DateTimePicker dateTimePicker)
+                    {
+                        Console.WriteLine($"DateTimePicker found: Name = {columnName}, Value = {dateTimePicker.Value:yyyy-MM-dd}");
+
+                        if (dateTimePicker.Value != DateTime.Now)
+                        {
+                            queryBuilder.Append($" AND {columnName} = @{columnName}");
+                            parameters.Add($"@{columnName}", dateTimePicker.Value.ToString("yyyy-MM-dd"));
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Unknown control found: Type = {foundControl.GetType().Name}, Name = {foundControl.Name}");
+                    }
+                }
+            }
+
+            Console.WriteLine($"Total controls found: {controlCount}");
+            Console.WriteLine($"Generated Query: {queryBuilder}");
+
+            try
+            {
+                DataTable filteredData = dbHelper.ExecuteQuery(queryBuilder.ToString(), parameters);
+
+                if (filteredData != null)
+                {
+                    Console.WriteLine($"Filtered rows count: {filteredData.Rows.Count}");
+
+                    dataGridView1.Columns.Clear();
+                    dataGridView1.AutoGenerateColumns = false;
+                    foreach (DataColumn column in filteredData.Columns)
+                    {
+                        DataGridViewTextBoxColumn dataGridViewColumn = new DataGridViewTextBoxColumn
+                        {
+                            DataPropertyName = column.ColumnName,
+                            Name = column.ColumnName
+                        };
+                        dataGridView1.Columns.Add(dataGridViewColumn);
+                    }
+                    dataGridView1.DataSource = filteredData;
+                }
+                else
+                {
+                    MessageBox.Show("No data found for the given filters.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                MessageBox.Show($"Ошибка при фильтрации данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -124,6 +237,10 @@ namespace Kino
                         {
                             comboBox.SelectedIndex = -1;
                         }
+                    }
+                    else if (inputField is CheckBox checkBox)
+                    {
+                        checkBox.Checked = Convert.ToBoolean(cell.Value);
                     }
                 }
             }
