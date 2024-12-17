@@ -1,4 +1,7 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 
 namespace Kino
 {
@@ -78,9 +81,9 @@ namespace Kino
             // 
             this.uuenda_btn.AutoSize = true;
             this.uuenda_btn.Font = new System.Drawing.Font("Microsoft JhengHei", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.uuenda_btn.Location = new System.Drawing.Point(427, 273);
+            this.uuenda_btn.Location = new System.Drawing.Point(352, 273);
             this.uuenda_btn.Name = "uuenda_btn";
-            this.uuenda_btn.Size = new System.Drawing.Size(80, 29);
+            this.uuenda_btn.Size = new System.Drawing.Size(75, 29);
             this.uuenda_btn.TabIndex = 25;
             this.uuenda_btn.Text = "Uuenda";
             this.uuenda_btn.UseVisualStyleBackColor = true;
@@ -89,9 +92,9 @@ namespace Kino
             // 
             this.kustuta_btn.AutoSize = true;
             this.kustuta_btn.Font = new System.Drawing.Font("Microsoft JhengHei", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.kustuta_btn.Location = new System.Drawing.Point(341, 273);
+            this.kustuta_btn.Location = new System.Drawing.Point(272, 273);
             this.kustuta_btn.Name = "kustuta_btn";
-            this.kustuta_btn.Size = new System.Drawing.Size(80, 29);
+            this.kustuta_btn.Size = new System.Drawing.Size(74, 29);
             this.kustuta_btn.TabIndex = 24;
             this.kustuta_btn.Text = "Kustuta";
             this.kustuta_btn.UseVisualStyleBackColor = true;
@@ -102,10 +105,11 @@ namespace Kino
             this.lisa_btn.Font = new System.Drawing.Font("Microsoft JhengHei", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lisa_btn.Location = new System.Drawing.Point(220, 273);
             this.lisa_btn.Name = "lisa_btn";
-            this.lisa_btn.Size = new System.Drawing.Size(115, 29);
+            this.lisa_btn.Size = new System.Drawing.Size(46, 29);
             this.lisa_btn.TabIndex = 23;
-            this.lisa_btn.Text = "Lisa andmed";
+            this.lisa_btn.Text = "Lisa";
             this.lisa_btn.UseVisualStyleBackColor = true;
+            this.lisa_btn.Click += new System.EventHandler(this.Lisa_btn_Click);
             // 
             // pictureBox1
             // 
@@ -119,9 +123,9 @@ namespace Kino
             // 
             this.filter_btn.AutoSize = true;
             this.filter_btn.Font = new System.Drawing.Font("Microsoft JhengHei", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.filter_btn.Location = new System.Drawing.Point(513, 273);
+            this.filter_btn.Location = new System.Drawing.Point(433, 273);
             this.filter_btn.Name = "filter_btn";
-            this.filter_btn.Size = new System.Drawing.Size(69, 29);
+            this.filter_btn.Size = new System.Drawing.Size(56, 29);
             this.filter_btn.TabIndex = 28;
             this.filter_btn.Text = "Filter";
             this.filter_btn.UseVisualStyleBackColor = true;

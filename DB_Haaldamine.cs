@@ -15,7 +15,7 @@ namespace Kino
 {
     public partial class DB_Haaldamine : Form
     {
-        private DatabaseHelper dbHelper;
+        private DatabaseQueryHelper dbHelper;
         private InputFieldGenerator inputFieldGenerator;
 
         static string projectRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\"));
@@ -24,7 +24,7 @@ namespace Kino
         public DB_Haaldamine()
         {
             InitializeComponent();
-            dbHelper = new DatabaseHelper();
+            dbHelper = new DatabaseQueryHelper();
             inputFieldGenerator = new InputFieldGenerator(dbHelper);
             LoadTableNames();
         }
@@ -86,110 +86,196 @@ namespace Kino
             }
         }
 
-        private void FilterData(string tableName)
+        private void Lisa_btn_Click(object sender, EventArgs e)
         {
-            StringBuilder queryBuilder = new StringBuilder($"SELECT * FROM {tableName} WHERE 1 = 1");
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            if (FieldsNotNull())
+            {
+                try
+                {
+                    string tableName = tableListBox.SelectedItem.ToString();
+                    DataTable columnsTable = dbHelper.ExecuteQuery($"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}'");
 
-            int controlCount = 0;
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+                    string columnList = string.Join(", ", columnsTable.Rows.Cast<DataRow>().Select(row => row["COLUMN_NAME"]));
+                    string valuePlaceholders = string.Join(", ", columnsTable.Rows.Cast<DataRow>().Select(row => $"@{row["COLUMN_NAME"]}"));
 
+                    foreach (DataRow column in columnsTable.Rows)
+                    {
+                        string columnName = column["COLUMN_NAME"].ToString();
+
+                        Control control = flowLayoutPanel1.Controls.Find(columnName, true).FirstOrDefault();
+                        if (control is TextBox textBox)
+                        {
+                            parameters.Add(columnName, textBox.Text);
+                        }
+                        else if (control is ComboBox comboBox)
+                        {
+                            if (comboBox.SelectedIndex >= 0)
+                            {
+                                parameters.Add(columnName, comboBox.SelectedIndex);
+                            }
+                            else
+                            {
+                                throw new Exception($"Поле '{columnName}' не имеет выбранного значения.");
+                            }
+                        }
+                        else if (control is NumericUpDown numericUpDown)
+                        {
+                            parameters.Add(columnName, numericUpDown.Value);
+                        }
+                        else if (control is DateTimePicker dateTimePicker)
+                        {
+                            parameters.Add(columnName, dateTimePicker.Value);
+                        }
+                    }
+
+                    //// Обработка изображения (если в таблице есть колонка "Pilt")
+                    //if (parameters.ContainsKey("Pilt") && !string.IsNullOrWhiteSpace(open?.FileName))
+                    //{
+                    //    string extension = Path.GetExtension(open.FileName);
+                    //    string imageFileName = parameters["Nimetus"] + extension;
+                    //    parameters["Pilt"] = imageFileName;
+                    //    SavePicture(imageFileName); // Сохраняем изображение
+                    //}
+
+                    // Выполняем запрос на добавление данных
+                    string query = $"INSERT INTO {tableName} ({columnList}) VALUES ({valuePlaceholders})";
+                    dbHelper.ExecuteNonQuery(query, parameters);
+
+                    ClearFields(); // Очищаем поля
+                    //NaitaAndmed(); // Обновляем отображение данных
+                    MessageBox.Show($"Sucess", "Sucess", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка работы с базой данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+
+        private void ClearFields()
+        {
             foreach (Control control in flowLayoutPanel1.Controls)
             {
-                controlCount++;
-
-                string columnName = control.Name;
-
-                // Используем Find для поиска каждого контрола по имени
-                Control[] foundControls = flowLayoutPanel1.Controls.Find(columnName, true);
-
-                if (foundControls.Length > 0)
+                if (control is TextBox textBox)
                 {
-                    // Получаем первый найденный контрол с таким именем
-                    Control foundControl = foundControls[0];
-
-                    if (foundControl is TextBox textBox)
+                    textBox.Text = string.Empty;
+                }
+                else if (control is ComboBox comboBox)
+                {
+                    if (comboBox.Items.Count > 0)
                     {
-                        Console.WriteLine($"TextBox found: Name = {columnName}, Value = {textBox.Text}");
+                        comboBox.SelectedIndex = 0; 
+                    }
+                }
+                else if (control is NumericUpDown numericUpDown)
+                {
+                    numericUpDown.Value = 0; 
+                }
+                else if (control is DateTimePicker dateTimePicker)
+                {
+                    dateTimePicker.Value = DateTime.Now; 
+                }
+                else if (control is PictureBox pictureBox)
+                {
+                    pictureBox.Image?.Dispose();
+                    pictureBox.Image = null;
+                }
+            }
+        }
 
-                        if (!string.IsNullOrEmpty(textBox.Text))
+        private bool FieldsNotNull()
+        {
+            foreach (Control control in flowLayoutPanel1.Controls)
+            {
+                if (control is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
+                {
+                    return false; 
+                }
+                else if (control is ComboBox comboBox && comboBox.SelectedIndex <= 0)
+                {
+                    return false; 
+                }
+                else if (control is NumericUpDown numericUpDown && numericUpDown.Value == 0)
+                {
+                    return false; 
+                }
+            }
+            return true;
+        }
+
+
+        private void FilterData(string selectedTable)
+        {
+            try
+            {
+                if (dataGridView1.DataSource is DataTable dataTable)
+                {
+                    List<string> filters = new List<string>();
+
+                    foreach (DataColumn column in dataTable.Columns)
+                    {
+                        string columnName = column.ColumnName;
+
+                        Control[] controls = flowLayoutPanel1.Controls.Find(columnName, true);
+                        if (controls.Length > 0)
                         {
-                            queryBuilder.Append($" AND {columnName} LIKE @{columnName}");
-                            parameters.Add($"@{columnName}", $"%{textBox.Text}%");
+                            Control inputField = controls[0];
+
+                            if (inputField is TextBox textBox && !string.IsNullOrEmpty(textBox.Text))
+                            {
+                                filters.Add($"[{columnName}] LIKE '%{textBox.Text}%'");
+                            }
+                            else if (inputField is NumericUpDown numericUpDown && numericUpDown.Value > 0)
+                            {
+                                filters.Add($"[{columnName}] = {numericUpDown.Value}");
+                            }
+                            //else if (inputField is DateTimePicker dateTimePicker)
+                            //{
+                            //    filters.Add($"[{columnName}] = #{dateTimePicker.Value:yyyy-MM-dd}#");
+                            //}
+                            else if (inputField is ComboBox comboBox)
+                            {
+                                if (comboBox.Items.Contains("True") && comboBox.Items.Contains("False"))
+                                {
+                                    if (comboBox.SelectedItem is string selectedBit && !string.IsNullOrEmpty(selectedBit))
+                                    {
+                                        filters.Add($"[{columnName}] = {(selectedBit == "True" ? 1 : 0)}");
+                                    }
+                                }
+                                else if (comboBox.SelectedIndex > 0)
+                                {
+                                    filters.Add($"[{columnName}] = '{comboBox.SelectedValue}'");
+                                }
+                            }
                         }
                     }
-                    else if (foundControl is ComboBox comboBox)
-                    {
-                        Console.WriteLine($"ComboBox found: Name = {columnName}, SelectedItem = {comboBox.SelectedItem}");
+                    string filterExpression = string.Join(" AND ", filters);
 
-                        if (comboBox.SelectedItem != null)
-                        {
-                            queryBuilder.Append($" AND {columnName} = @{columnName}");
-                            parameters.Add($"@{columnName}", comboBox.SelectedItem.ToString());
-                        }
-                    }
-                    else if (foundControl is NumericUpDown numericUpDown)
+                    if (!string.IsNullOrEmpty(filterExpression))
                     {
-                        Console.WriteLine($"NumericUpDown found: Name = {columnName}, Value = {numericUpDown.Value}");
-
-                        if (numericUpDown.Value > 0)
-                        {
-                            queryBuilder.Append($" AND {columnName} = @{columnName}");
-                            parameters.Add($"@{columnName}", numericUpDown.Value);
-                        }
-                    }
-                    else if (foundControl is DateTimePicker dateTimePicker)
-                    {
-                        Console.WriteLine($"DateTimePicker found: Name = {columnName}, Value = {dateTimePicker.Value:yyyy-MM-dd}");
-
-                        if (dateTimePicker.Value != DateTime.Now)
-                        {
-                            queryBuilder.Append($" AND {columnName} = @{columnName}");
-                            parameters.Add($"@{columnName}", dateTimePicker.Value.ToString("yyyy-MM-dd"));
-                        }
+                        dataTable.DefaultView.RowFilter = filterExpression;
                     }
                     else
                     {
-                        Console.WriteLine($"Unknown control found: Type = {foundControl.GetType().Name}, Name = {foundControl.Name}");
+                        dataTable.DefaultView.RowFilter = string.Empty;
                     }
-                }
-            }
-
-            Console.WriteLine($"Total controls found: {controlCount}");
-            Console.WriteLine($"Generated Query: {queryBuilder}");
-
-            try
-            {
-                DataTable filteredData = dbHelper.ExecuteQuery(queryBuilder.ToString(), parameters);
-
-                if (filteredData != null)
-                {
-                    Console.WriteLine($"Filtered rows count: {filteredData.Rows.Count}");
-
-                    dataGridView1.Columns.Clear();
-                    dataGridView1.AutoGenerateColumns = false;
-                    foreach (DataColumn column in filteredData.Columns)
-                    {
-                        DataGridViewTextBoxColumn dataGridViewColumn = new DataGridViewTextBoxColumn
-                        {
-                            DataPropertyName = column.ColumnName,
-                            Name = column.ColumnName
-                        };
-                        dataGridView1.Columns.Add(dataGridViewColumn);
-                    }
-                    dataGridView1.DataSource = filteredData;
                 }
                 else
                 {
-                    MessageBox.Show("No data found for the given filters.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Источник данных недоступен или некорректен.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
                 MessageBox.Show($"Ошибка при фильтрации данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -229,26 +315,33 @@ namespace Kino
                     }
                     else if (inputField is ComboBox comboBox)
                     {
-                        if (cell.Value != null && cell.Value != DBNull.Value && int.TryParse(cell.Value.ToString(), out int index))
+                        if (comboBox.Items.Contains("True") && comboBox.Items.Contains("False"))
                         {
-                            comboBox.SelectedIndex = index - 1;
+                            if (cell.Value.ToString() == "True")
+                            {
+                                comboBox.SelectedItem = "True";
+                            }
+                            else if (cell.Value.ToString() == "False")
+                            {
+                                comboBox.SelectedItem = "False";
+                            }
                         }
                         else
                         {
-                            comboBox.SelectedIndex = -1;
+                            if (cell.Value != null && cell.Value != DBNull.Value && int.TryParse(cell.Value.ToString(), out int index))
+                            {
+                                comboBox.SelectedIndex = index;
+                            }
+                            else
+                            {
+                                comboBox.SelectedIndex = -1;
+                            }
                         }
-                    }
-                    else if (inputField is CheckBox checkBox)
-                    {
-                        checkBox.Checked = Convert.ToBoolean(cell.Value);
                     }
                 }
             }
-
-            // Обработка изображения (если присутствует)
             if (dataGridView1.Columns.Contains("poster"))
             {
-                // Обработка изображения
                 if (selectedRow.Cells["poster"].Value != null && !string.IsNullOrEmpty(selectedRow.Cells["poster"].Value.ToString()))
                 {
                     try

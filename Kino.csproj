@@ -82,7 +82,7 @@
     <Compile Include="StartVorm.Designer.cs">
       <DependentUpon>StartVorm.cs</DependentUpon>
     </Compile>
-    <Compile Include="DatabaseHelper.cs" />
+    <Compile Include="DatabaseQueryHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DB_Haaldamine.resx">

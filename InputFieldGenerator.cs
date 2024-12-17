@@ -9,7 +9,7 @@ namespace Kino
 {
     public class InputFieldGenerator
     {
-        private DatabaseHelper dbHelper;
+        private DatabaseQueryHelper dbHelper;
 
         private Font labelFont = new Font("Microsoft Sans Serif", 13f);
         private Font fieldFont = new Font("Microsoft Sans Serif", 9.5f);
@@ -17,7 +17,7 @@ namespace Kino
         static string projectRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\"));
         static string imageFolder = Path.Combine(projectRoot, @"Posters");
 
-        public InputFieldGenerator(DatabaseHelper dbHelper)
+        public InputFieldGenerator(DatabaseQueryHelper dbHelper)
         {
             this.dbHelper = dbHelper;
         }
@@ -53,17 +53,6 @@ namespace Kino
                 panel.Controls.Add(uniteButton);
             }
         }
-
-        //private Button CreateFilterButton(string columnName)
-        //{
-        //    return new Button
-        //    {
-        //        Name = $"{columnName}_filterBtn",
-        //        Width = 25,
-        //        Height = 25,
-        //        Font = fieldFont
-        //    };
-        //}
 
 
         private void TransformForeignKeyFields(FlowLayoutPanel panel, DataTable foreignKeysTable)
@@ -109,6 +98,11 @@ namespace Kino
             string query = $"SELECT {referencedColumn}, {displayColumn} FROM {referencedTable}";
             DataTable dataSource = dbHelper.ExecuteQuery(query);
 
+            DataRow emptyRow = dataSource.NewRow();
+            emptyRow[referencedColumn] = DBNull.Value;
+            emptyRow[displayColumn] = "";
+            dataSource.Rows.InsertAt(emptyRow, 0);
+
             return new ComboBox
             {
                 Name = columnName,
@@ -131,7 +125,7 @@ namespace Kino
             }
             else if(dataType == "bit")
             {
-                return CreateCheckBox(columnName);
+                return CreateBitComboBox(columnName);
             }
             else
             {
@@ -147,7 +141,7 @@ namespace Kino
                 AutoSize = true,
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
                 TabIndex = 0,
-                Text = "Ühenda tabelid",
+                Text = "Ühenda väljad",
                 UseVisualStyleBackColor = true
             };
         }
@@ -234,6 +228,16 @@ namespace Kino
             };
         }
 
+        private ComboBox CreateBitComboBox(string columnName)
+        {
+            return new ComboBox
+            {
+                Name = columnName,
+                Width = 60,
+                Font = fieldFont,
+                Items = { "", "True", "False" }
+            };
+        }
 
         private TextBox CreateTextBox(string columnName)
         {
