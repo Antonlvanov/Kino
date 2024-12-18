@@ -119,9 +119,13 @@ namespace Kino
             {
                 return CreateNumericUpDown(columnName);
             }
-            else if (dataType == "datetime" || dataType == "date")
+            else if (dataType == "datetime")
             {
                 return CreateDateTimePicker(columnName);
+            }
+            else if (dataType == "date")
+            {
+                return CreateDatePicker(columnName);
             }
             else if(dataType == "bit")
             {
@@ -213,6 +217,19 @@ namespace Kino
                 Name = columnName,
                 Format = DateTimePickerFormat.Custom,
                 CustomFormat = "yyyy-MM-dd HH:mm:ss",
+                Width = 160,
+                Font = fieldFont
+            };
+        }
+
+        private DateTimePicker CreateDatePicker(string columnName)
+        {
+            return new DateTimePicker
+            {
+                Name = columnName,
+                Format = DateTimePickerFormat.Custom,
+                CustomFormat = "yyyy-MM-dd",
+                ShowUpDown = true,
                 Width = 160,
                 Font = fieldFont
             };

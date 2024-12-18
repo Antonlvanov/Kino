@@ -60,29 +60,35 @@ namespace Kino
             if (tableListBox.SelectedItem != null)
             {
                 string selected_table = tableListBox.SelectedItem.ToString();
-                try
+                NaitaAndmed();
+                inputFieldGenerator.GenerateFields(flowLayoutPanel1, selected_table);
+            }
+        }
+
+        private void NaitaAndmed()
+        {
+            string selected_table = tableListBox.SelectedItem.ToString();
+            try
+            {
+                string query = $"SELECT * FROM {selected_table}";
+                DataTable dataTable = dbHelper.ExecuteQuery(query);
+
+                dataGridView1.Columns.Clear();
+                dataGridView1.AutoGenerateColumns = false;
+
+                foreach (DataColumn column in dataTable.Columns)
                 {
-                    string query = $"SELECT * FROM {selected_table}";
-                    DataTable dataTable = dbHelper.ExecuteQuery(query);
-
-                    dataGridView1.Columns.Clear();
-                    dataGridView1.AutoGenerateColumns = false;
-
-                    foreach (DataColumn column in dataTable.Columns)
-                    {
-                        DataGridViewTextBoxColumn dataGridViewColumn = new DataGridViewTextBoxColumn();
-                        dataGridViewColumn.DataPropertyName = column.ColumnName;
-                        dataGridViewColumn.Name = column.ColumnName;
-                        dataGridView1.Columns.Add(dataGridViewColumn);
-                    }
-
-                    dataGridView1.DataSource = dataTable;
-                    inputFieldGenerator.GenerateFields(flowLayoutPanel1, selected_table);
+                    DataGridViewTextBoxColumn dataGridViewColumn = new DataGridViewTextBoxColumn();
+                    dataGridViewColumn.DataPropertyName = column.ColumnName;
+                    dataGridViewColumn.Name = column.ColumnName;
+                    dataGridView1.Columns.Add(dataGridViewColumn);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Viga andmete laadimisel: {ex.Message}", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+
+                dataGridView1.DataSource = dataTable;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Viga andmete laadimisel: {ex.Message}", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -93,26 +99,33 @@ namespace Kino
                 try
                 {
                     string tableName = tableListBox.SelectedItem.ToString();
-                    DataTable columnsTable = dbHelper.ExecuteQuery($"SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{tableName}'");
+                    Console.WriteLine($"Selected table: {tableName}");
 
+                    // Получаем список колонок из dataGridView1
+                    var columnNames = dataGridView1.Columns.Cast<DataGridViewColumn>()
+                                       .Select(col => col.Name)
+                                       .Where(name => !string.Equals(name, "id", StringComparison.OrdinalIgnoreCase)) // Исключаем автоинкрементное поле "id"
+                                       .ToList();
+
+                    Console.WriteLine($"Columns retrieved for table {tableName}: {string.Join(", ", columnNames)}");
+
+                    // Формируем список параметров для запроса
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
-                    string columnList = string.Join(", ", columnsTable.Rows.Cast<DataRow>().Select(row => row["COLUMN_NAME"]));
-                    string valuePlaceholders = string.Join(", ", columnsTable.Rows.Cast<DataRow>().Select(row => $"@{row["COLUMN_NAME"]}"));
-
-                    foreach (DataRow column in columnsTable.Rows)
+                    foreach (string columnName in columnNames)
                     {
-                        string columnName = column["COLUMN_NAME"].ToString();
-
                         Control control = flowLayoutPanel1.Controls.Find(columnName, true).FirstOrDefault();
+
                         if (control is TextBox textBox)
                         {
                             parameters.Add(columnName, textBox.Text);
+                            Console.WriteLine($"TextBox value for {columnName}: {textBox.Text}");
                         }
                         else if (control is ComboBox comboBox)
                         {
-                            if (comboBox.SelectedIndex >= 0)
+                            if (comboBox.SelectedIndex > 0)
                             {
                                 parameters.Add(columnName, comboBox.SelectedIndex);
+                                Console.WriteLine($"ComboBox value for {columnName}: {comboBox.SelectedIndex}");
                             }
                             else
                             {
@@ -122,37 +135,48 @@ namespace Kino
                         else if (control is NumericUpDown numericUpDown)
                         {
                             parameters.Add(columnName, numericUpDown.Value);
+                            Console.WriteLine($"NumericUpDown value for {columnName}: {numericUpDown.Value}");
                         }
                         else if (control is DateTimePicker dateTimePicker)
                         {
                             parameters.Add(columnName, dateTimePicker.Value);
+                            Console.WriteLine($"DateTimePicker value for {columnName}: {dateTimePicker.Value}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No matching control found for {columnName}.");
                         }
                     }
 
-                    //// Обработка изображения (если в таблице есть колонка "Pilt")
-                    //if (parameters.ContainsKey("Pilt") && !string.IsNullOrWhiteSpace(open?.FileName))
-                    //{
-                    //    string extension = Path.GetExtension(open.FileName);
-                    //    string imageFileName = parameters["Nimetus"] + extension;
-                    //    parameters["Pilt"] = imageFileName;
-                    //    SavePicture(imageFileName); // Сохраняем изображение
-                    //}
+                    // Проверяем сформированные параметры
+                    foreach (var param in parameters)
+                    {
+                        Console.WriteLine($"Parameter: {param.Key} = {param.Value}");
+                    }
 
-                    // Выполняем запрос на добавление данных
+                    // Генерируем запрос
+                    string columnList = string.Join(", ", parameters.Keys);
+                    string valuePlaceholders = string.Join(", ", parameters.Keys.Select(key => $"@{key}"));
                     string query = $"INSERT INTO {tableName} ({columnList}) VALUES ({valuePlaceholders})";
-                    dbHelper.ExecuteNonQuery(query, parameters);
 
-                    ClearFields(); // Очищаем поля
-                    //NaitaAndmed(); // Обновляем отображение данных
-                    MessageBox.Show($"Sucess", "Sucess", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Console.WriteLine($"Generated query: {query}");
+
+                    try { dbHelper.ExecuteNonQuery(query, parameters); }
+                    catch (Exception ex) { Console.WriteLine(ex.Message); }
+
+                    ClearFields();
+                    NaitaAndmed();
+                    MessageBox.Show($"Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка работы с базой данных: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Console.WriteLine($"Error: {ex.Message}");
+                    MessageBox.Show($"Ошибка при добавлении: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
+                Console.WriteLine("Fields are not completely filled.");
                 MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
