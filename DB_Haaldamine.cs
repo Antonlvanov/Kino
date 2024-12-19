@@ -59,18 +59,16 @@ namespace Kino
         {
             if (tableListBox.SelectedItem != null)
             {
-                string selected_table = tableListBox.SelectedItem.ToString();
                 NaitaAndmed();
-                inputFieldGenerator.GenerateFields(flowLayoutPanel1, selected_table);
+                inputFieldGenerator.GenerateFields(flowLayoutPanel1, tableListBox.SelectedItem.ToString());
             }
         }
 
         private void NaitaAndmed()
         {
-            string selected_table = tableListBox.SelectedItem.ToString();
             try
             {
-                string query = $"SELECT * FROM {selected_table}";
+                string query = $"SELECT * FROM {tableListBox.SelectedItem.ToString()}";
                 DataTable dataTable = dbHelper.ExecuteQuery(query);
 
                 dataGridView1.Columns.Clear();
@@ -99,17 +97,10 @@ namespace Kino
                 try
                 {
                     string tableName = tableListBox.SelectedItem.ToString();
-                    Console.WriteLine($"Selected table: {tableName}");
-
-                    // Получаем список колонок из dataGridView1
                     var columnNames = dataGridView1.Columns.Cast<DataGridViewColumn>()
                                        .Select(col => col.Name)
-                                       .Where(name => !string.Equals(name, "id", StringComparison.OrdinalIgnoreCase)) // Исключаем автоинкрементное поле "id"
+                                       .Where(name => !string.Equals(name, "id", StringComparison.OrdinalIgnoreCase))
                                        .ToList();
-
-                    Console.WriteLine($"Columns retrieved for table {tableName}: {string.Join(", ", columnNames)}");
-
-                    // Формируем список параметров для запроса
                     Dictionary<string, object> parameters = new Dictionary<string, object>();
                     foreach (string columnName in columnNames)
                     {
@@ -118,14 +109,19 @@ namespace Kino
                         if (control is TextBox textBox)
                         {
                             parameters.Add(columnName, textBox.Text);
-                            Console.WriteLine($"TextBox value for {columnName}: {textBox.Text}");
                         }
                         else if (control is ComboBox comboBox)
                         {
                             if (comboBox.SelectedIndex > 0)
                             {
-                                parameters.Add(columnName, comboBox.SelectedIndex);
-                                Console.WriteLine($"ComboBox value for {columnName}: {comboBox.SelectedIndex}");
+                                if (comboBox.Items.Contains("True") && comboBox.Items.Contains("False"))
+                                {
+                                    parameters.Add(columnName, comboBox.SelectedItem.ToString().Equals("True") ? 1 : 0);
+                                }
+                                else
+                                {
+                                    parameters.Add(columnName, comboBox.SelectedIndex);
+                                }
                             }
                             else
                             {
@@ -135,102 +131,120 @@ namespace Kino
                         else if (control is NumericUpDown numericUpDown)
                         {
                             parameters.Add(columnName, numericUpDown.Value);
-                            Console.WriteLine($"NumericUpDown value for {columnName}: {numericUpDown.Value}");
                         }
                         else if (control is DateTimePicker dateTimePicker)
                         {
                             parameters.Add(columnName, dateTimePicker.Value);
-                            Console.WriteLine($"DateTimePicker value for {columnName}: {dateTimePicker.Value}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"No matching control found for {columnName}.");
                         }
                     }
-
-                    // Проверяем сформированные параметры
-                    foreach (var param in parameters)
-                    {
-                        Console.WriteLine($"Parameter: {param.Key} = {param.Value}");
-                    }
-
-                    // Генерируем запрос
                     string columnList = string.Join(", ", parameters.Keys);
                     string valuePlaceholders = string.Join(", ", parameters.Keys.Select(key => $"@{key}"));
                     string query = $"INSERT INTO {tableName} ({columnList}) VALUES ({valuePlaceholders})";
 
-                    Console.WriteLine($"Generated query: {query}");
-
                     try { dbHelper.ExecuteNonQuery(query, parameters); }
                     catch (Exception ex) { Console.WriteLine(ex.Message); }
 
+                    if (tableName == "seansid")
+                    {
+                        var result = MessageBox.Show(
+                            "Kas soovite luua istekohti uueks seansiks?",
+                            "Kohtade loomine",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question
+                        );
+
+                        if (result == DialogResult.Yes)
+                        {   
+                            CreateSeatsForSession(parameters);
+                        }
+                    }
+
                     ClearFields();
                     NaitaAndmed();
-                    MessageBox.Show($"Success", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Edukalt lisatud", "Lisatud", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    MessageBox.Show($"Ошибка при добавлении: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Viga lisamisel: {ex.Message}", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                Console.WriteLine("Fields are not completely filled.");
-                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Palun täitke kõik väljad", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
-
-        private void ClearFields()
+        private void CreateSeatsForSession(Dictionary<string, object> sessionParameters)
         {
-            foreach (Control control in flowLayoutPanel1.Controls)
+            try
             {
-                if (control is TextBox textBox)
+                // Проверка sessionParameters
+                if (!sessionParameters.TryGetValue("saal_id", out object saalIdObj) || saalIdObj == null || saalIdObj == DBNull.Value)
                 {
-                    textBox.Text = string.Empty;
+                    throw new Exception("Не удалось получить ID зала из параметров сеанса.");
                 }
-                else if (control is ComboBox comboBox)
+
+                int saalId = Convert.ToInt32(saalIdObj);
+
+                // Проверка sessionId
+                int sessionId = dbHelper.GetLastInsertedId();
+                if (sessionId <= 0)
                 {
-                    if (comboBox.Items.Count > 0)
+                    throw new Exception("Некорректный ID сеанса.");
+                }
+
+                // Получаем параметры зала
+                string saalQuery = "SELECT ridade_arv, kohad_ridades FROM saalid WHERE saal_id = @SaalId";
+                var saalParameters = new Dictionary<string, object> { { "@SaalId", saalId } };
+
+                var saalDataTable = dbHelper.ExecuteQuery(saalQuery, saalParameters);
+                if (saalDataTable == null || saalDataTable.Rows.Count == 0)
+                {
+                    throw new Exception("Зал с указанным ID не найден.");
+                }
+
+                // Проверка данных из зала
+                var saalRow = saalDataTable.Rows[0];
+                int ridadeArv = saalRow["ridade_arv"] != DBNull.Value ? Convert.ToInt32(saalRow["ridade_arv"]) : 0;
+                int kohadRidades = saalRow["kohad_ridades"] != DBNull.Value ? Convert.ToInt32(saalRow["kohad_ridades"]) : 0;
+
+                if (ridadeArv <= 0 || kohadRidades <= 0)
+                {
+                    throw new Exception("Некорректные данные: число рядов или мест в ряду не может быть равно 0.");
+                }
+
+                // Лог для отладки
+                Console.WriteLine($"Ряды: {ridadeArv}, Мест в ряду: {kohadRidades}");
+
+                // Создание мест
+                for (int rida = 1; rida <= ridadeArv; rida++)
+                {
+                    for (int koht = 1; koht <= kohadRidades; koht++)
                     {
-                        comboBox.SelectedIndex = 0; 
+                        char kohtLetter = (char)('A' + (koht - 1));
+                        string kohtNimi = $"{rida}{kohtLetter}";
+
+                        string kohtQuery = @"
+                INSERT INTO kohad (koht_nimi, seanss_id, rida, koht_ridades, broneeritud)
+                VALUES (@KohtNimi, @SeanssId, @Rida, @KohtRidades, 0)";
+                        var kohtParameters = new Dictionary<string, object>
+                {
+                    { "@KohtNimi", kohtNimi },
+                    { "@SeanssId", sessionId },
+                    { "@Rida", rida },
+                    { "@KohtRidades", koht }
+                };
+
+                        dbHelper.ExecuteNonQuery(kohtQuery, kohtParameters);
                     }
                 }
-                else if (control is NumericUpDown numericUpDown)
-                {
-                    numericUpDown.Value = 0; 
-                }
-                else if (control is DateTimePicker dateTimePicker)
-                {
-                    dateTimePicker.Value = DateTime.Now; 
-                }
-                else if (control is PictureBox pictureBox)
-                {
-                    pictureBox.Image?.Dispose();
-                    pictureBox.Image = null;
-                }
-            }
-        }
 
-        private bool FieldsNotNull()
-        {
-            foreach (Control control in flowLayoutPanel1.Controls)
-            {
-                if (control is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
-                {
-                    return false; 
-                }
-                else if (control is ComboBox comboBox && comboBox.SelectedIndex <= 0)
-                {
-                    return false; 
-                }
-                else if (control is NumericUpDown numericUpDown && numericUpDown.Value == 0)
-                {
-                    return false; 
-                }
+                MessageBox.Show("Места для нового сеанса успешно созданы!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            return true;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при создании мест: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
 
@@ -384,5 +398,57 @@ namespace Kino
                 }
             }
         }
+
+        private void ClearFields()
+        {
+            foreach (Control control in flowLayoutPanel1.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    textBox.Text = string.Empty;
+                }
+                else if (control is ComboBox comboBox)
+                {
+                    if (comboBox.Items.Count > 0)
+                    {
+                        comboBox.SelectedIndex = 0;
+                    }
+                }
+                else if (control is NumericUpDown numericUpDown)
+                {
+                    numericUpDown.Value = 0;
+                }
+                else if (control is DateTimePicker dateTimePicker)
+                {
+                    dateTimePicker.Value = DateTime.Now;
+                }
+                else if (control is PictureBox pictureBox)
+                {
+                    pictureBox.Image?.Dispose();
+                    pictureBox.Image = null;
+                }
+            }
+        }
+
+        private bool FieldsNotNull()
+        {
+            foreach (Control control in flowLayoutPanel1.Controls)
+            {
+                if (control is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
+                {
+                    return false;
+                }
+                else if (control is ComboBox comboBox && comboBox.SelectedIndex <= 0)
+                {
+                    return false;
+                }
+                else if (control is NumericUpDown numericUpDown && numericUpDown.Value == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 }

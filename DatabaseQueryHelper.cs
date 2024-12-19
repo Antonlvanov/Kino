@@ -31,6 +31,12 @@ namespace Kino
                 conn = new SqlConnection($@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={db_path};Integrated Security=True");
             }
         }
+        public int GetLastInsertedId()
+        {
+            string query = "SELECT SCOPE_IDENTITY()";
+            object result = ExecuteScalar(query); // ExecuteScalar возвращает одиночное значение
+            return result != null ? Convert.ToInt32(result) : 0;
+        }
         /// Executes an SQL query and returns the results as a DataTable.
         public DataTable ExecuteQuery(string query, Dictionary<string, object> parameters = null)
         {

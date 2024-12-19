@@ -76,6 +76,7 @@
     <Compile Include="KavaVorm.Designer.cs">
       <DependentUpon>KavaVorm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DynamicModel.cs" />
     <Compile Include="StartVorm.cs">
       <SubType>Form</SubType>
     </Compile>
