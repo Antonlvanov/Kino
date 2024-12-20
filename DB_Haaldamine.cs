@@ -64,6 +64,7 @@ namespace Kino
             }
         }
 
+
         private void NaitaAndmed()
         {
             try

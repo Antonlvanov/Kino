@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Kino
 {
-    partial class DB_Haaldamine
+    partial class AdminForm
     {
         /// <summary>
         /// Required designer variable.
@@ -109,7 +109,7 @@ namespace Kino
             this.lisa_btn.TabIndex = 23;
             this.lisa_btn.Text = "Lisa";
             this.lisa_btn.UseVisualStyleBackColor = true;
-            this.lisa_btn.Click += new System.EventHandler(this.Lisa_btn_Click);
+            //this.lisa_btn.Click += new System.EventHandler(this.Lisa_btn_Click);
             // 
             // pictureBox1
             // 
@@ -129,7 +129,7 @@ namespace Kino
             this.filter_btn.TabIndex = 28;
             this.filter_btn.Text = "Filter";
             this.filter_btn.UseVisualStyleBackColor = true;
-            this.filter_btn.Click += new System.EventHandler(this.filter_btn_Click);
+            //this.filter_btn.Click += new System.EventHandler(this.filter_btn_Click);
             // 
             // DB_Haaldamine
             // 

@@ -30,7 +30,6 @@ namespace Kino
             public string ReferencedColumn { get; set; }
         }
 
-
         // Получение значения поля
         public object GetValue(string fieldName)
         {

@@ -16,7 +16,7 @@ namespace Kino
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new DB_Haaldamine());
+            Application.Run(new AdminForm());
         }
     }
 }
