@@ -27,6 +27,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -63,57 +64,80 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdminForm\AdminForm.cs">
+    <Compile Include="Forms\Admin\AdminForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AdminForm\AdminForm.Designer.cs">
-      <DependentUpon>AdminForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AdminForm\TalbeInputModel.cs" />
-    <Compile Include="DB_Haaldamine.cs">
+    <Compile Include="Forms\Admin\AdminFormUtils.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DB_Haaldamine.Designer.cs">
-      <DependentUpon>DB_Haaldamine.cs</DependentUpon>
-    </Compile>
-    <Compile Include="InputFieldGenerator.cs" />
-    <Compile Include="KavaVorm.cs">
+    <Compile Include="Forms\Admin\AdminFormFieldGenerator.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="KavaVorm.Designer.cs">
-      <DependentUpon>KavaVorm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DynamicModel.cs" />
-    <Compile Include="StartVorm.cs">
+    <Compile Include="Forms\Admin\AdminFormInit.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="StartVorm.Designer.cs">
-      <DependentUpon>StartVorm.cs</DependentUpon>
+    <Compile Include="Forms\Admin\AdminFormMethods.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DatabaseQueryHelper.cs" />
+    <Compile Include="Forms\Admin\AdminFormResize.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Admin\AdminFormVars.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Database\dbHelper.cs" />
+    <Compile Include="Database\Queries.cs" />
+    <Compile Include="Database\Table.cs" />
+    <Compile Include="Forms\Login\LoginFormInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Register\RegisterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Register\RegisterForm.Designer.cs">
+      <DependentUpon>RegisterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Register\RegisterFormInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Sessions\SessionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Sessions\SessionsFormInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Start\StartFormInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Start\StartForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Start\StartFormUtils.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Start\StartFormVars.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AdminForm\AdminForm.resx">
-      <DependentUpon>AdminForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DB_Haaldamine.resx">
-      <DependentUpon>DB_Haaldamine.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="KavaVorm.resx">
-      <DependentUpon>KavaVorm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="StartVorm.resx">
-      <DependentUpon>StartVorm.cs</DependentUpon>
+    <Compile Include="Forms\Login\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="UserControl\User.cs" />
+    <Compile Include="UserControl\UserManager.cs" />
+    <EmbeddedResource Include="Forms\Start\StartForm.resx">
+      <DependentUpon>StartForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -140,10 +164,15 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Andmebaas.mdf" />
-    <Content Include="Andmebaas_log.ldf">
+    <Content Include="Database\Andmebaas.mdf" />
+    <Content Include="Database\Andmebaas_log.ldf">
       <DependentUpon>Andmebaas.mdf</DependentUpon>
     </Content>
+    <Content Include="Images\chain.png" />
+    <Content Include="Images\refresh.png" />
+    <Content Include="Images\usericon.png" />
+    <Content Include="KohtGenerator.sql" />
+    <Content Include="SeansGenerator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Posters\" />

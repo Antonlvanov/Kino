@@ -1,0 +1,9 @@
+EXEC sp_msforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL';
+
+TRUNCATE TABLE [dbo].[filmid];
+
+DELETE FROM [dbo].[filmid];
+
+DBCC CHECKIDENT ('dbo.filmid', RESEED, 0);
+
+EXEC sp_msforeachtable 'ALTER TABLE ? CHECK CONSTRAINT ALL';
