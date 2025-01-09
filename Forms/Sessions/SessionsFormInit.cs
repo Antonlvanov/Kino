@@ -3,10 +3,12 @@ using Kino.UserControl;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Kino.Forms.Sessions
 {
@@ -19,6 +21,10 @@ namespace Kino.Forms.Sessions
         public Panel pnlSessions { get; set; }
         public UserManager UserManager { get; set; }
         public dbHelper dbHelper { get; set; }
+        private Panel UserPanel { get; set; }
+        private PictureBox UserIcon { get; set; }
+        private Label UserNameLabel { get; set; }
+        private Label UserStatusLabel { get; set; }
 
         private void InitializeComponent()
         {
@@ -28,8 +34,8 @@ namespace Kino.Forms.Sessions
             {
                 BackColor = Color.LightGray,
                 AutoScroll = true,
-                Location = new Point(17, this.Height / 8),
-                Size = new Size(this.Width - 50, (this.Height / 8) * 7 - 50),
+                Location = new Point(17, this.Height / 10),
+                Size = new Size(this.Width - 50, (this.Height / 10) * 9 - 50),
                 BorderStyle = BorderStyle.FixedSingle,
             };
 
@@ -62,6 +68,7 @@ namespace Kino.Forms.Sessions
 
             PositionDateAndButtons();
 
+            InitUserPanel();
             this.Controls.Add(btnPrevDay);
             this.Controls.Add(btnNextDay);
             this.Controls.Add(lblDate);
@@ -69,18 +76,55 @@ namespace Kino.Forms.Sessions
 
             LoadSessionsForDate(currentDate);
 
-            this.Resize += (s, e) =>
-            {
-                pnlSessions.Size = new Size(this.Width - 50, (this.Height / 7) * 6 - 50);
-                pnlSessions.Location = new Point(15, this.Height / 7);
-                //sessionPanel.Size = new Size(pnlSessions.Width, pnlSessions.Height/2);
-                PositionDateAndButtons(); 
-            };
-
             btnPrevDay.Paint += (s, e) => DrawTriangle(e.Graphics, btnPrevDay.ClientRectangle, true);
             btnPrevDay.Click += BtnPrevDay_Click;
             btnNextDay.Paint += (s, e) => DrawTriangle(e.Graphics, btnNextDay.ClientRectangle, false);
             btnNextDay.Click += BtnNextDay_Click;
+        }
+
+        public void InitUserPanel ()
+        {
+            UserPanel = new Panel
+            {
+                Size = new Size(100, 40),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left,
+                Location = new Point(17, 20),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightGray
+            };
+            UserIcon = new PictureBox
+            {
+                Size = new Size(30, 30),
+                Location = new Point(12, 5),
+                Image = Image.FromFile(Path.Combine(DB_PATHS.ImageFolder, "usericon.png")),
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+            UserNameLabel = CreateLabel("", new Point(47, 10));
+            UserNameLabel.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
+
+            UserStatusLabel = CreateLabel("", new Point(17, 59));
+            UserStatusLabel.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
+            UserStatusLabel.FlatStyle = FlatStyle.Flat;
+            UserStatusLabel.BorderStyle = BorderStyle.FixedSingle;
+            UserStatusLabel.BackColor = Color.LightGray;
+            UserStatusLabel.AutoSize = false;
+            UserStatusLabel.Visible = false;
+
+            UserPanel.Controls.Add(UserIcon);
+            UserPanel.Controls.Add(UserNameLabel);
+            Controls.Add(UserPanel);
+            Controls.Add(UserStatusLabel);
+
+            UserIcon.Click += UserPanel_Click;
+            UserNameLabel.Click += UserPanel_Click;
+            UserPanel.Click += UserPanel_Click;
+        }
+        private void UserPanel_Click(object sender, EventArgs e)
+        {
+            if (UserManager.CurrentUser.Role != Role.Guest)
+            {
+                UserStatusLabel.Visible = !UserStatusLabel.Visible;
+            }
         }
 
         private void PositionDateAndButtons()
@@ -129,6 +173,20 @@ namespace Kino.Forms.Sessions
                 AutoSize = true,
                 TextAlign = ContentAlignment.MiddleLeft,
             };
+            return label;
+        }
+
+        private Label CreateLabel(string text, Point location)
+        {
+            var label = new Label
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 20F, FontStyle.Regular),
+                AutoSize = true,
+                Location = location,
+                TextAlign = ContentAlignment.MiddleCenter,
+            };
+            label.PerformLayout();
             return label;
         }
     }

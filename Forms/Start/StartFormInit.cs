@@ -49,15 +49,18 @@ namespace Kino.Forms.Start
             UserPanel.Controls.Add(UserNameLabel);
             Controls.Add(UserPanel);
 
-            UserStatusLabel = CreateLabel("", new Point(11, 60));
+            UserStatusLabel = CreateLabel("", new Point(10, 59));
             UserStatusLabel.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
             UserStatusLabel.BackColor = Color.LightYellow;
             UserStatusLabel.FlatStyle = FlatStyle.Flat;
+            UserStatusLabel.BorderStyle = BorderStyle.FixedSingle;
+            UserStatusLabel.AutoSize = false;
             UserStatusLabel.Visible = false;
 
             LogoutButton = CreateButton("Loogi välja", new Point(10, 79));
             LogoutButton.Font = new Font("Segoe UI", 9.25F, FontStyle.Regular);
             LogoutButton.Visible = false;
+            UserStatusLabel.Width = LogoutButton.Width+8;
 
             Controls.Add(UserStatusLabel);
             Controls.Add(LogoutButton);
@@ -65,9 +68,7 @@ namespace Kino.Forms.Start
             Kino = CreateLabel("Kino", new Point(0, 0));
             Kino.BackColor = Color.Transparent;
             Kino.FlatStyle = FlatStyle.Flat; 
-
             Sessions = CreateButton("Filmi Kava", new Point(0, 0), new Font("Segoe UI", 15F, FontStyle.Regular));
-
             AdminPanel = CreateButton("Haaldamine", new Point(0, 0), new Font("Segoe UI", 15F, FontStyle.Regular));
             Login = CreateButton("Sisse loogi", new Point(0, 0));
             Register = CreateButton("Registreeri", new Point(0, 0));
@@ -86,6 +87,7 @@ namespace Kino.Forms.Start
             Register.Click += Register_Click;
             AdminPanel.Click += AdminPanel_Click;
             LogoutButton.Click += LogoutButton_Click;
+            Sessions.Click += Sessions_Click;
         }
     }
 }

@@ -10,18 +10,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Kino.Forms.Saal;
 
 namespace Kino.Forms.Sessions
 {
     public partial class SessionsForm : Form
     {
-        public SessionsForm() //UserManager userManager
+        public SessionsForm(UserManager userManager) 
         {
-            //UserManager = userManager;
+            UserManager = userManager;
             dbHelper = new dbHelper();
             this.Text = "Kino kava";
             this.Size = new Size(700, 900);
             InitializeComponent();
+            UpdateFormForUser();
         }
 
         private void BtnPrevDay_Click(object sender, EventArgs e)
@@ -36,6 +38,20 @@ namespace Kino.Forms.Sessions
             currentDate = currentDate.Date.AddDays(1);
             lblDate.Text = currentDate.ToString("dd-MM-yyyy");
             LoadSessionsForDate(currentDate);
+        }
+
+        public void UpdateFormForUser()
+        {
+            if (UserManager.CurrentUser.Role == Role.Guest)
+            {
+                UserStatusLabel.Visible = false;
+                UserNameLabel.Text = "Küla";
+            }
+            if (UserManager.CurrentUser.Role != Role.Guest)
+            {
+                UserNameLabel.Text = UserManager.CurrentUser.UserName;
+                UserStatusLabel.Text = $"Roll: {UserManager.CurrentUser.Role.ToString()}";
+            }
         }
 
         private void LoadSessionsForDate(DateTime date)
@@ -59,7 +75,7 @@ namespace Kino.Forms.Sessions
         {
             var sessionPanel = new Panel
             {
-                Size = new Size(pnlSessions.Width - 40, pnlSessions.Height / 2), 
+                Size = new Size(pnlSessions.Width - 40, pnlSessions.Height / 2 - 30), 
                 Location = new Point(10, topPosition),
                 Margin = new Padding(10),
                 BackColor = Color.White,
@@ -115,7 +131,10 @@ namespace Kino.Forms.Sessions
             {
                 Text = "Osta",
                 Dock = DockStyle.Bottom,
-                Margin = new Padding(5)
+                Margin = new Padding(5),
+                BackColor = Color.LightGray,
+                FlatStyle = FlatStyle.Flat,
+                TabStop = false,
             };
             btnBuy.Click += (s, e) => BuyTicket(session);
 
@@ -145,11 +164,12 @@ namespace Kino.Forms.Sessions
             };
             DataTable resultTable = dbHelper.ExecuteQuery(Queries.GetSessionsDataForDate(), parameters);
 
-            var sessions = new List<Session>();
+            List<Session> sessions = new List<Session>();
             foreach (DataRow row in resultTable.Rows)
             {
                 Session session = new Session
                 {
+                    seanss_id = Convert.ToInt32(row["seanss_id"]),
                     seansi_nimi = row["seansi_nimi"].ToString(),
                     kuupaev = DateTime.Parse(row["kuupaev"].ToString()),
                     alus_aeg = DateTime.Parse(row["alus_aeg"].ToString()),
@@ -178,11 +198,13 @@ namespace Kino.Forms.Sessions
 
         private void BuyTicket(Session session)
         {
-            MessageBox.Show($"Ticket for {session.seansi_nimi} has been purchased.");
+            SaalForm saalForm = new SaalForm(session);
+            saalForm.ShowDialog();
         }
 
         public class Session
         {
+            public int seanss_id {  get; set; }
             public string seansi_nimi { get; set; }
             public Film film { get; set; }
             public Saal saal { get; set; }

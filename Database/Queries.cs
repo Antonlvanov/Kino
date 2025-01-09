@@ -8,10 +8,16 @@ namespace Kino.Database
 {
     public class Queries
     {
+        public static string GetSeatsForSeanss(int seanss_id)
+        {
+            return $"SELECT koht_id, koht_nimi, seanss_id, rida, koht_ridades, broneeritud FROM kohad WHERE seanss_id = {seanss_id}";
+        }
+
         public static string GetSessionsDataForDate()
         {
             return @"
                     SELECT 
+                        s.seanss_id,
                         s.seansi_nimi,
                         s.kuupaev,
                         s.alus_aeg,

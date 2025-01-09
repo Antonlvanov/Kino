@@ -42,7 +42,7 @@ namespace Kino.Forms.Start
         }
         public void Sessions_Click(object sender, EventArgs e)
         {
-            SessionsForm sessions = new SessionsForm();//UserManager
+            SessionsForm sessions = new SessionsForm(UserManager);
             sessions.ShowDialog();
         }
 
