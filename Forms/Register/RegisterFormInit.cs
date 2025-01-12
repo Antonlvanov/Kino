@@ -26,7 +26,7 @@ namespace Kino.Forms.Register
         public TextBox ClientPhoneInput { get; set; }
 
         public UserManager UserManager { get; set; }
-        public ClientManager clientManager { get; set; }
+        public ClientManager clientManager = new ClientManager();
 
         public void Initialize()
         {
