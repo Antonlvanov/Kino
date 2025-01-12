@@ -32,7 +32,7 @@ namespace Kino.Forms.Sessions
 
             pnlSessions = new Panel()
             {
-                BackColor = Color.LightGray,
+                BackColor = Color.LightYellow,
                 AutoScroll = true,
                 Location = new Point(17, this.Height / 10),
                 Size = new Size(this.Width - 50, (this.Height / 10) * 9 - 50),
@@ -64,6 +64,7 @@ namespace Kino.Forms.Sessions
                 TextAlign = ContentAlignment.MiddleCenter,
                 Font = new Font("Arial", 16, FontStyle.Bold),
                 BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.LightYellow,
             };
 
             PositionDateAndButtons();
@@ -90,7 +91,7 @@ namespace Kino.Forms.Sessions
                 Anchor = AnchorStyles.Top | AnchorStyles.Left,
                 Location = new Point(17, 20),
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.LightGray
+                BackColor = Color.LightGray,
             };
             UserIcon = new PictureBox
             {

@@ -132,7 +132,7 @@ namespace Kino.Forms.Sessions
                 Text = "Osta",
                 Dock = DockStyle.Bottom,
                 Margin = new Padding(5),
-                BackColor = Color.LightGray,
+                BackColor = Color.LightYellow,
                 FlatStyle = FlatStyle.Flat,
                 TabStop = false,
             };
@@ -198,8 +198,8 @@ namespace Kino.Forms.Sessions
 
         private void BuyTicket(Session session)
         {
-            SaalForm saalForm = new SaalForm(session);
-            saalForm.ShowDialog();
+            SaalForm saalForm = new SaalForm(UserManager, session);
+            saalForm.Show();
         }
 
         public class Session

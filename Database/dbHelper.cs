@@ -153,6 +153,7 @@ namespace Kino.Database
         public static string DBPath => Path.Combine(ProjectRoot, "Database", DBName);
         public static string PosterFolder => Path.Combine(ProjectRoot, "Posters");
         public static string ImageFolder => Path.Combine(ProjectRoot, "Images");
+        public static string TicketsFolder => Path.Combine(ProjectRoot, "Piletid");
     }
 
 }

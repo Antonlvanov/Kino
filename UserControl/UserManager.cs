@@ -154,32 +154,6 @@ namespace Kino.UserControl
             }
         }
 
-        public int CreateKlientRecord(string nimi, string email, string telefon)
-        {
-            Dictionary<string, object> parameters = new Dictionary<string, object>
-            {
-                { "@nimi", nimi },
-                { "@email", email },
-                { "@telefon", telefon }
-            };
-
-            string query = @"
-            INSERT INTO klientid (nimi, email, telefon)
-            VALUES (@nimi, @email, @telefon);
-            SELECT SCOPE_IDENTITY();"; 
-
-            object result = dbHelper.ExecuteScalar(query, parameters);
-
-            if (result != null && int.TryParse(result.ToString(), out int klientId))
-            {
-                return klientId;
-            }
-            else
-            {
-                throw new Exception("Не удалось создать клиента.");
-            }
-        }
-
         public bool UserExists(string userName, string email)
         {
             return Users.Any(u => u.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase) ||
@@ -191,6 +165,7 @@ namespace Kino.UserControl
             User user = Users.FirstOrDefault(u => u.UserName == userName);
             return user != null && user.IsKlient;
         }
+
     }
 
 }

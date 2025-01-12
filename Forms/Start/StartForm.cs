@@ -33,17 +33,17 @@ namespace Kino.Forms.Start
         private void Register_Click(object sender, System.EventArgs e)
         {
             RegisterForm registerForm = new RegisterForm(UserManager);
-            registerForm.ShowDialog();
+            registerForm.Show();
         }
         public void AdminPanel_Click(object sender, EventArgs e)
         {
             AdminForm adminForm = new AdminForm();
-            adminForm.ShowDialog();
+            adminForm.Show();
         }
         public void Sessions_Click(object sender, EventArgs e)
         {
             SessionsForm sessions = new SessionsForm(UserManager);
-            sessions.ShowDialog();
+            sessions.Show();
         }
 
         public void UpdateFormForUser()

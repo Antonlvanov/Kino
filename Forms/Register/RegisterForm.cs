@@ -59,7 +59,7 @@ namespace Kino.Forms.Register
                 string telefon = ClientPhoneInput.Text;
                 try
                 {
-                    klientId = UserManager.CreateKlientRecord(nimi, email, telefon);
+                    klientId = clientManager.CreateKlientRecord(nimi, email, telefon);
                 }
                 catch (Exception ex)
                 {

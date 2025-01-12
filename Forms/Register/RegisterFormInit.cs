@@ -1,4 +1,5 @@
-﻿using Kino.UserControl;
+﻿using Kino.ClientControl;
+using Kino.UserControl;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -25,6 +26,7 @@ namespace Kino.Forms.Register
         public TextBox ClientPhoneInput { get; set; }
 
         public UserManager UserManager { get; set; }
+        public ClientManager clientManager { get; set; }
 
         public void Initialize()
         {
