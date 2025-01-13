@@ -32,17 +32,20 @@ namespace Kino.Forms.Saal
         public void CreateSeats()
         {
             pnlSeats.Controls.Clear();
+            int totalRows = Convert.ToInt32(Session.saal.ridade_arv);
             foreach (Koht koht in kohad)
             {
+                int adjustedRow = totalRows - koht.rida + 1;
+
                 Button seatButton = new Button()
                 {
-                    BackgroundImage = koht.broneeritud ? Image.FromFile(Path.Combine(DB_PATHS.ImageFolder, "seattaken.png")): Image.FromFile(Path.Combine(DB_PATHS.ImageFolder, "seat.png")),
+                    BackgroundImage = koht.broneeritud ? Image.FromFile(Path.Combine(DB_PATHS.ImageFolder, "seattaken.png")) : Image.FromFile(Path.Combine(DB_PATHS.ImageFolder, "seat.png")),
                     BackgroundImageLayout = ImageLayout.Stretch,
                     FlatStyle = FlatStyle.Flat,
                     Size = new Size(seatWidth, seatHeight),
                     Location = new Point(
                         margin + (koht.koht_ridades - 1) * (seatWidth + margin),
-                        margin + (koht.rida - 1) * (seatHeight + margin)
+                        margin + (adjustedRow - 1) * (seatHeight + margin)
                     ),
                     Tag = koht.koht_id,
                     Name = koht.koht_nimi,
@@ -52,6 +55,7 @@ namespace Kino.Forms.Saal
                 pnlSeats.Controls.Add(seatButton);
             }
         }
+
 
         private void LoadSeatsFromDatabase()
         {

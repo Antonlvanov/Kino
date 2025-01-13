@@ -1,19 +1,16 @@
-﻿using iText.IO.Image;
-using iText.Kernel.Pdf;
-using iText.Layout.Element;
-using iText.Layout;
-using iText.Layout.Properties;
+﻿using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
+using QuestPDF.Helpers;
+using static QuestPDF.Settings;
 using Kino.UserControl;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using static Kino.Forms.Saal.SaalForm;
 using static Kino.Forms.Sessions.SessionsForm;
-using static Kino.UserControl.UserManager;
+using System.IO;
 using Kino.Database;
 using Kino.TicketControl;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Kino.Forms.Ostmine
 {
@@ -21,6 +18,7 @@ namespace Kino.Forms.Ostmine
     {
         public OstmineForm(UserManager userManager, Session session, List<Koht> selectedSeats)
         {
+            License = LicenseType.Community;
             UserManager = userManager;
             Session = session;
             SelectedSeats = selectedSeats;
@@ -36,12 +34,12 @@ namespace Kino.Forms.Ostmine
                 {
                     foreach (var seat in SelectedSeats)
                     {
-
+                        MakeTicketPDF(seat);
                     }
-                    if (AddTicketsToDB(klient_id))
-                    {
+                    //if (AddTicketsToDB(klient_id))
+                    //{
                         
-                    }
+                    //}
                 }
             }
         }
@@ -104,57 +102,56 @@ namespace Kino.Forms.Ostmine
             }
         }
 
+        private void MakeTicketPDF(Koht seat)
+        {
+            string ticketFileName = $"{DB_PATHS.TicketsFolder}/Ticket_Seanss_{Session.seanss_id}_Koht_{seat.koht_id}.pdf";
+            string posterlocation = Path.Combine(DB_PATHS.PosterFolder, Session.film.poster);
 
-        //private void MakeTicketPDF(Koht seat)
-        //{
-        //    string ticketFileName = $"{DB_PATHS.TicketsFolder}/Ticket_Seanss_{Session.seanss_id}_Koht_{seat.koht_id}.pdf";
+            Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(2, Unit.Centimetre);
 
-        //    using (var writer = new iText.Kernel.Pdf.PdfWriter(ticketFileName))
-        //    {
-        //        using (var pdf = new iText.Layout.Document(new iText.Kernel.Pdf.PdfDocument(writer)))
-        //        {
-        //            // Шрифты и стили
-        //            var font = iText.IO.Font.Constants.StandardFonts.HELVETICA;
-        //            var normalFont = iText.Kernel.Font.PdfFontFactory.CreateFont(font);
+                    // Разделение контента на два столбца (текст и изображение)
+                    page.Content().Row(row =>
+                    {
+                        // Столбец для текста
+                        row.RelativeColumn(1).Column(column =>
+                        {
+                            column.Item().Text($"Pilet: {seat.koht_nimi}").FontSize(20).Bold();
+                            column.Item().Text("");
+                            column.Item().Text($"Film: {Session.film.pealkiri}").FontSize(14);
+                            column.Item().Text($"Kuupäev: {Session.kuupaev.ToShortDateString()}").FontSize(14);
+                            column.Item().Text($"Kellaeg: {Session.alus_aeg:HH:mm} - {Session.lopp_aeg:HH:mm}").FontSize(14);
+                            column.Item().Text($"Saal: {Session.saal.saali_nimi}").FontSize(14);
+                            column.Item().Text($"Koht: {seat.rida} - {seat.koht_ridades}").FontSize(14);
+                            column.Item().Text($"Hind: {GetSelectedPrice(priceComboBox)} €").FontSize(14);
+                            column.Item().Text("");
+                            column.Item().Text("");
+                            column.Item().Text("Ostja andmed:").Bold().FontSize(12);
+                            column.Item().Text($"Nimi: {nimiInput.Text}").FontSize(12);
+                            column.Item().Text($"Email: {emailInput.Text}").FontSize(12);
+                            column.Item().Text($"Telefon: {phoneInput.Text}").FontSize(12);
+                        });
+                        row.RelativeColumn(1).Column(imageColumn =>
+                        {
+                            imageColumn.Item().AlignRight().Element(imageContainer =>
+                            {
+                                imageContainer
+                                    .Width(230)
+                                    .Height(300)
+                                    .Image(posterlocation, ImageScaling.FitArea);
+                            });
+                        });
+                    });
+                });
+            }).GeneratePdf(ticketFileName);
 
-        //            // Таблица для информации
-        //            var table = new iText.Layout.Element.Table(2).UseAllAvailableWidth();
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Film:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph(Session.film.pealkiri).SetFont(normalFont)));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Seansi kuupäev:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph(Session.kuupaev.ToShortDateString()).SetFont(normalFont)));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Seansi aeg:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph($"{Session.alus_aeg:HH:mm} - {Session.lopp_aeg:HH:mm}").SetFont(normalFont)));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Saal:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph(Session.saal.saali_nimi).SetFont(normalFont)));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Koht:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph($"{seat.rida}, {seat.koht_ridades}").SetFont(normalFont)));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("Hind:").SetFont(normalFont).SetBold()));
-        //            table.AddCell(new iText.Layout.Element.Cell().Add(new iText.Layout.Element.Paragraph("10€").SetFont(normalFont))); // пример цены
+            MessageBox.Show($"Билет успешно сохранен:", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
-        //            pdf.Add(table);
-
-        //            if (!string.IsNullOrEmpty(Session.film.poster))
-        //            {
-        //                try
-        //                {
-        //                    var image = new iText.Layout.Element.Image(iText.IO.Image.ImageDataFactory.Create(Session.film.poster));
-        //                    image.SetWidth(200);
-        //                    pdf.Add(image);
-        //                }
-        //                catch (Exception ex)
-        //                {
-        //                    MessageBox.Show($"Не удалось загрузить постер фильма: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //                }
-        //            }
-
-        //            pdf.Add(new iText.Layout.Element.Paragraph("\n"));
-        //            pdf.Add(new iText.Layout.Element.Paragraph("Head vaatamist!").SetFont(normalFont).SetBold());
-        //        }
-        //    }
-
-        //    MessageBox.Show($"Билет для места {seat.koht_nimi} успешно создан: {ticketFileName}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //}
 
         private void SalvestaAndmed_Click(object sender, EventArgs e)
         {
