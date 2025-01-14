@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +26,10 @@ namespace Kino.Forms.Ostmine
         private ClientManager clientManager = new ClientManager();
         private TicketManager ticketManager = new TicketManager();
         private List<Koht> SelectedSeats;
+        List<string> ticketPaths = new List<string>();
+        int current_client_id;
+        private SmtpClient smtpClient;
+        private MailMessage mailMessage;
 
         private Label nimiLabel;
         private TextBox nimiInput;
@@ -38,7 +43,7 @@ namespace Kino.Forms.Ostmine
 
         private Button makeTickets;
         private Button sendTickets;
-        private Button salvestaAndmed;
+        private Button uuendaAndmed;
 
         private Label piletidLabel;
         private Panel pnlPiletid;
@@ -90,7 +95,7 @@ namespace Kino.Forms.Ostmine
 
             sendTickets = CreateButton("Saata piletid emaili", new Point(12, pnlPiletid.Bottom - 28));
             makeTickets = CreateButton("Luua piletid", new Point(12, sendTickets.Top - sendTickets.Height - 10));
-            salvestaAndmed = CreateButton("Uuenda andmed", new Point(12, makeTickets.Top - makeTickets.Height - 10));
+            uuendaAndmed = CreateButton("Uuenda andmed", new Point(12, makeTickets.Top - makeTickets.Height - 10));
 
             Controls.Add(nimiLabel);
             Controls.Add(nimiInput);
@@ -105,12 +110,15 @@ namespace Kino.Forms.Ostmine
             Controls.Add(pnlPiletid);
             Controls.Add(piletidLabel);
 
-            Controls.Add(salvestaAndmed);
+            Controls.Add(uuendaAndmed);
             Controls.Add(makeTickets);
             Controls.Add(sendTickets);
 
-            salvestaAndmed.Click += SalvestaAndmed_Click;
+            uuendaAndmed.Click += UuendaAndmed_Click;
             makeTickets.Click += MakeTickets_Click;
+            sendTickets.Click += SendTickets_Click;
+            uuendaAndmed.Visible = false;
+            sendTickets.Visible = false;
         }
 
         public void InitUserPanel()
