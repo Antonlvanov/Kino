@@ -141,6 +141,7 @@ namespace Kino.Forms.Ostmine
                 try
                 {
                     klient_id = clientManager.CreateKlientRecord(nimi, email, telefon);
+                    klient = clientManager.GetKlientData(klient_id);
                     return klient_id;
                 }
                 catch (Exception ex)
@@ -151,7 +152,7 @@ namespace Kino.Forms.Ostmine
             }
             else
             {
-                return 0;
+                return (int)existingKlientId;
             }
         }
 
@@ -206,7 +207,7 @@ namespace Kino.Forms.Ostmine
             {
                 using (SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587))
                 {
-                    smtpClient.Credentials = new NetworkCredential("anton9032@gmail.com", "smd");
+                    smtpClient.Credentials = new NetworkCredential("anton9032@gmail.com", "wcto pxqz cfom iskn");
                     smtpClient.EnableSsl = true;
                     using (MailMessage mailMessage = new MailMessage())
                     {
@@ -237,7 +238,7 @@ namespace Kino.Forms.Ostmine
                         }
 
                         smtpClient.Send(mailMessage);
-                        MessageBox.Show("Письмо успешно отправлено.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Kiri saadeti edukalt", "Edu", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }

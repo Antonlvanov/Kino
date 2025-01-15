@@ -29,13 +29,13 @@ namespace Kino.Forms.Register
 
             if (password != confirmPassword)
             {
-                MessageBox.Show("Пароли не совпадают. Попробуйте снова.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Paroolid ei ühti. Proovige uuesti.", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
-                MessageBox.Show("Пожалуйста, заполните все обязательные поля.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Palun täitke kõik nõutud väljad.", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             int? klientId = null;
@@ -45,12 +45,12 @@ namespace Kino.Forms.Register
                 bool registrationSuccess = UserManager.AddUser(username, password, email, role);
                 if (registrationSuccess)
                 {
-                    MessageBox.Show("Регистрация прошла успешно!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Registreerimine õnnestus!", "Õnnestus", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("Пользователь с таким именем или email уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Sama nime või e-posti aadressiga kasutaja on juba olemas.", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             if (isKlient)
@@ -63,19 +63,19 @@ namespace Kino.Forms.Register
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при добавлении клиента: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Viga kliendi lisamisel: {ex.Message}", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 bool registrationSuccess = UserManager.AddUser(username, password, email, role, klientId?.ToString());
                 if (registrationSuccess)
                 {
-                    MessageBox.Show("Регистрация прошла успешно!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Registreerimine õnnestus!", "Õnnestus", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                 }
                 else
                 {
-                    MessageBox.Show("Пользователь с таким именем или email уже существует.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Sama nime või e-posti aadressiga kasutaja on juba olemas", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

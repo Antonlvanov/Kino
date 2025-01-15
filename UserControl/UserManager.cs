@@ -23,11 +23,11 @@ namespace Kino.UserControl
 
         public bool AddUser(string userName, string password, string email, Role role, string klient_id = null)
         {
-            Console.WriteLine("Попытка добавить пользователя: " + userName);
+            Console.WriteLine("Kasutaja lisamise katse:" + userName);
 
             if (UserExists(userName, email))
             {
-                Console.WriteLine("Пользователь с таким именем или email уже существует.");
+                Console.WriteLine("Sama nime või e-posti aadressiga kasutaja on juba olemas.");
                 return false;
             }
 
@@ -40,7 +40,7 @@ namespace Kino.UserControl
             int? klientId = string.IsNullOrEmpty(klient_id) ? (int?)null : Convert.ToInt32(klient_id);
 
             User newUser = new User(userName, hashedPassword, salt, email, role, klientId);
-            Console.WriteLine($"Добавлен новый пользователь: {newUser.UserName} с ролью: {newUser.Role}");
+            Console.WriteLine($"Lisas uue kasutaja: {newUser.UserName} rolliga: {newUser.Role}");
 
             Users.Add(newUser);
             AddUserToDatabase(newUser);
@@ -54,7 +54,7 @@ namespace Kino.UserControl
             if (user != null && VerifyPassword(password, user.PasswordHash, user.Salt))
             {
                 CurrentUser = user;
-                Console.WriteLine($"Пользователь вошел: {CurrentUser.UserName}, роль: {CurrentUser.Role}");
+                Console.WriteLine($"Kasutaja sisse logitud: {CurrentUser.UserName}, roll:{CurrentUser.Role}");
                 return true;
             }
             return false;
@@ -66,7 +66,6 @@ namespace Kino.UserControl
 
         private (string hash, string salt) HashPassword(string password)
         {
-            Console.WriteLine("Генерация соли и хеширование пароля.");
             // generating salt
             byte[] saltBytes = new byte[16];
             using (var rng = RandomNumberGenerator.Create())
@@ -105,7 +104,6 @@ namespace Kino.UserControl
         {
             try
             {
-                Console.WriteLine("Чтение пользователей из базы данных.");
                 DataTable userTable = dbHelper.ExecuteQuery(Queries.GetAllUsers());
 
                 Users.Clear();
@@ -117,14 +115,13 @@ namespace Kino.UserControl
                     string email = row["email"].ToString();
                     Role role = Enum.TryParse(row["role"].ToString(), out Role parsedRole) ? parsedRole : Role.Guest;
                     int? klient_id = row["klient_id"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["klient_id"]);
-                    Console.WriteLine($"Загружен пользователь: {userName}, роль: {role}, соль: {salt}");
 
                     Users.Add(new User(userName, passwordHash, salt, email, role, klient_id));
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при чтении пользователей из базы данных: {ex.Message}");
+                Console.WriteLine($"Viga kasutajate lugemisel andmebaasist: {ex.Message}");
                 throw;
             }
         }
@@ -133,7 +130,7 @@ namespace Kino.UserControl
         {
             try
             {
-                Console.WriteLine($"Добавление пользователя в базу данных: {user.UserName}");
+                Console.WriteLine($"Kasutaja lisamine andmebaasi: {user.UserName}");
                 Dictionary<string, object> parameters = new Dictionary<string, object>
             {
                 { "@userName", user.UserName },
@@ -145,11 +142,11 @@ namespace Kino.UserControl
             };
 
                 dbHelper.ExecuteNonQuery(Queries.InsertUser(), parameters);
-                Console.WriteLine("Пользователь успешно добавлен в базу данных.");
+                Console.WriteLine("Kasutaja on edukalt andmebaasi lisatud.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка при добавлении пользователя в базу данных: {ex.Message}");
+                Console.WriteLine($"Viga kasutaja lisamisel andmebaasi: {ex.Message}");
                 throw;
             }
         }

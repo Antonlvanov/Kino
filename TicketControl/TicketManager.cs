@@ -32,11 +32,12 @@ namespace Kino.TicketControl
                     VALUES (@piletiNimi, @klientId, @seanssId, @kohtId, @hind)";
 
                     dbHelper.ExecuteNonQuery(query, parameters);
-                    Console.WriteLine($"Билет {ticket.pileti_nimi} успешно добавлен в базу данных.");
+                    Console.WriteLine($"Pilet {ticket.pileti_nimi} on edukalt andmebaasi lisatud");
+                    UpdateSeatStatus(ticket.koht_id);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ошибка при добавлении билета {ticket.pileti_nimi}: {ex.Message}");
+                    Console.WriteLine($"Viga pileti lisamisel {ticket.pileti_nimi}: {ex.Message}");
                     allTicketsAdded = false;
                 }
             }
@@ -50,6 +51,27 @@ namespace Kino.TicketControl
             return allTicketsAdded;
         }
 
+        private void UpdateSeatStatus(int kohtId)
+        {
+            try
+            {
+                string updateQuery = @"
+                UPDATE kohad
+                SET broneeritud = 1
+                WHERE koht_id = @kohtId";
 
+                dbHelper.ExecuteNonQuery(updateQuery, new Dictionary<string, object>
+                {
+                    { "@kohtId", kohtId }
+                });
+
+                Console.WriteLine($"Koht {kohtId} staatus on uuendatud: broneeritud");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Viga koha staatuse uuendamisel (Koht ID: {kohtId}): {ex.Message}");
+                throw;
+            }
+        }
     }
 }
