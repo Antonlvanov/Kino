@@ -207,7 +207,7 @@ namespace Kino.Forms.Ostmine
             {
                 using (SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587))
                 {
-                    smtpClient.Credentials = new NetworkCredential("anton9032@gmail.com", "wcto pxqz cfom iskn");
+                    smtpClient.Credentials = new NetworkCredential("anton9032@gmail.com", "");
                     smtpClient.EnableSsl = true;
                     using (MailMessage mailMessage = new MailMessage())
                     {
