@@ -138,12 +138,12 @@ namespace Kino.Forms.Sessions
             if (seanssId > 0)
             {
                 CreateSeats(seanssId, saalId);
-                MessageBox.Show("Сеанс успешно добавлен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Seanss edukalt lisatud!", "Edu", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Ошибка при добавлении сеанса.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Viga seansi lisamisel.", "Viga", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void CreateSeats(int seanssId, string saalId)
