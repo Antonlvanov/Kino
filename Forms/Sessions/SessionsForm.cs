@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Kino.Forms.Saal;
+using static Kino.Forms.Sessions.SessionsForm;
 
 namespace Kino.Forms.Sessions
 {
@@ -39,6 +40,12 @@ namespace Kino.Forms.Sessions
             lblDate.Text = currentDate.ToString("dd-MM-yyyy");
             LoadSessionsForDate(currentDate);
         }
+        private void CreateSeanss_Click(object sender, EventArgs e)
+        {
+            AddSessionForm addSessionForm = new AddSessionForm();
+            addSessionForm.ShowDialog();
+        }
+
 
         public void UpdateFormForUser()
         {
@@ -154,7 +161,6 @@ namespace Kino.Forms.Sessions
 
             return sessionPanel;
         }
-
 
         private List<Session> GetSessionsForDate(DateTime date)
         {

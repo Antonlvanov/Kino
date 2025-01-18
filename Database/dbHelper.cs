@@ -28,11 +28,40 @@ namespace Kino.Database
                 conn = new SqlConnection($@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename={DB_PATHS.DBPath};Integrated Security=True");
             }
         }
-        public int GetLastInsertedId()
+        public int GetLastInsertedId(string query, Dictionary<string, object> parameters)
         {
-            string query = "SELECT SCOPE_IDENTITY()";
-            object result = ExecuteScalar(query);
-            return result != null ? Convert.ToInt32(result) : 0;
+            try
+            {
+                if (conn.State != ConnectionState.Open)
+                {
+                    conn.Open();
+                }
+
+                using (cmd = new SqlCommand(query, conn))
+                {
+                    if (parameters != null)
+                    {
+                        foreach (var param in parameters)
+                        {
+                            cmd.Parameters.AddWithValue(param.Key, param.Value);
+                        }
+                    }
+
+                    return Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка выполнения команды: {ex.Message}");
+                return 0;
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+            }
         }
         /// Executes an SQL query and returns the results as a DataTable.
         public DataTable ExecuteQuery(string query, Dictionary<string, object> parameters = null)

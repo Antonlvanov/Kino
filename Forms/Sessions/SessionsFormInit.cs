@@ -25,6 +25,7 @@ namespace Kino.Forms.Sessions
         private PictureBox UserIcon { get; set; }
         private Label UserNameLabel { get; set; }
         private Label UserStatusLabel { get; set; }
+        public Button CreateSeanss { get; set; }
 
         private void InitializeComponent()
         {
@@ -67,9 +68,20 @@ namespace Kino.Forms.Sessions
                 BackColor = Color.LightYellow,
             };
 
+            CreateSeanss = new Button()
+            {
+                Text = "Lisa seanss",
+                Font = new Font("Arial", 12, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.LightYellow,
+                AutoSize = true,
+                Visible = UserManager.CurrentUser.Role == Role.Admin,
+            };
+
             PositionDateAndButtons();
 
             InitUserPanel();
+            this.Controls.Add(CreateSeanss);
             this.Controls.Add(btnPrevDay);
             this.Controls.Add(btnNextDay);
             this.Controls.Add(lblDate);
@@ -81,6 +93,8 @@ namespace Kino.Forms.Sessions
             btnPrevDay.Click += BtnPrevDay_Click;
             btnNextDay.Paint += (s, e) => DrawTriangle(e.Graphics, btnNextDay.ClientRectangle, false);
             btnNextDay.Click += BtnNextDay_Click;
+
+            CreateSeanss.Click += CreateSeanss_Click;
         }
 
         public void InitUserPanel ()
@@ -136,6 +150,7 @@ namespace Kino.Forms.Sessions
 
             btnPrevDay.Location = new Point(lblDate.Left - btnPrevDay.Width - 10, lblDate.Top + (lblDate.Height - btnPrevDay.Height) / 2);
             btnNextDay.Location = new Point(lblDate.Right + 10, lblDate.Top + (lblDate.Height - btnNextDay.Height) / 2);
+            CreateSeanss.Location = new Point(btnNextDay.Right+20, pnlSessions.Top / 2 - CreateSeanss.Height/2);
         }
 
         private void DrawTriangle(Graphics g, Rectangle bounds, bool isLeft)

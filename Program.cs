@@ -16,7 +16,7 @@ namespace Kino
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Forms.Start.StartForm());
+            Application.Run(new Forms.Start.StartForm()); // new Forms.Start.StartForm()
         }
     }
 }
